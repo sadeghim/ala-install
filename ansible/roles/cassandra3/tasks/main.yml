@@ -99,6 +99,14 @@
     - cassandra 
     - cassandra_yaml    
 
+- name: Change OS settings for network and VM
+  block:
+    - copy: src=conf/sysctl.d.conf dest=/etc/sysctl.d/cassandra.conf
+    - command: sysctl -p /etc/sysctl.d/cassandra.conf
+  tags:   
+    - cassandra 
+    - sysctld    
+
 - name: clean up directories that have been created by initial installation of cassandra 3
   shell: 'rm -Rf /data/cassandra3/data && rm -Rf /data/cassandra3/commitlog && rm -Rf /var/log/cassandra/* && rm -Rf /var/lib/cassandra/hints'
   when: ansible_os_family == "Debian"

@@ -232,7 +232,7 @@ commit_failure_policy: stop
 # Constantly re-preparing statements is a performance penalty.
 #
 # Default value ("auto") is 1/256th of the heap or 10MB, whichever is greater
-prepared_statements_cache_size_mb:
+prepared_statements_cache_size_mb: 500
 
 # Maximum size of the Thrift prepared statement cache
 #
@@ -444,14 +444,14 @@ concurrent_materialized_view_writes: 32
 # under heavy write load.
 #
 # memtable_cleanup_threshold defaults to 1 / (memtable_flush_writers + 1)
-# memtable_cleanup_threshold: 0.11
+memtable_cleanup_threshold: 0.15
 
 # Specify the way Cassandra allocates and manages memtable memory.
 # Options are:
 #   heap_buffers:    on heap nio buffers
 #   offheap_buffers: off heap (direct) nio buffers
 #   offheap_objects: off heap objects
-memtable_allocation_type: heap_buffers
+memtable_allocation_type: offheap_objects
 
 # Total space to use for commit logs on disk.
 #
@@ -472,7 +472,7 @@ memtable_allocation_type: heap_buffers
 #
 # If your data directories are backed by SSD, you can increase this, but
 # avoid having memtable_flush_writers * data_file_directories > number of cores
-#memtable_flush_writers: 1
+memtable_flush_writers: 6
 
 # A fixed memory pool size in MB for for SSTable index summaries. If left
 # empty, this will default to 5% of the heap size. If the memory usage of
@@ -493,8 +493,8 @@ index_summary_resize_interval_in_minutes: 60
 # buffers. Enable this to avoid sudden dirty buffer flushing from
 # impacting read latencies. Almost always a good idea on SSDs; not
 # necessarily on platters.
-trickle_fsync: false
-trickle_fsync_interval_in_kb: 10240
+trickle_fsync: true
+trickle_fsync_interval_in_kb: 1024
 
 # TCP port, for commands and data
 # For security reasons, you should not expose this port to the internet.  Firewall it if needed.
@@ -716,7 +716,7 @@ column_index_cache_size_in_kb: 2
 # 
 # If your data directories are backed by SSD, you should increase this
 # to the number of cores.
-#concurrent_compactors: 1
+concurrent_compactors: 8
 
 # Throttles compaction to the given total throughput across the entire
 # system. The faster you insert data, the faster you need to compact in
@@ -724,7 +724,7 @@ column_index_cache_size_in_kb: 2
 # 16 to 32 times the rate you are inserting data is more than sufficient.
 # Setting this to 0 disables throttling. Note that this account for all types
 # of compaction, including validation compaction.
-compaction_throughput_mb_per_sec: 16
+compaction_throughput_mb_per_sec: 100
 
 # When compacting, the replacement sstable(s) can be opened before they
 # are completely written, and used in place of the prior sstables for
@@ -747,11 +747,11 @@ sstable_preemptive_open_interval_in_mb: 50
 # inter_dc_stream_throughput_outbound_megabits_per_sec: 200
 
 # How long the coordinator should wait for read operations to complete
-read_request_timeout_in_ms: 20000
+read_request_timeout_in_ms: 60000
 # How long the coordinator should wait for seq or index scans to complete
-range_request_timeout_in_ms: 20000
+range_request_timeout_in_ms: 60000
 # How long the coordinator should wait for writes to complete
-write_request_timeout_in_ms: 20000
+write_request_timeout_in_ms: 60000
 # How long the coordinator should wait for counter writes to complete
 counter_write_request_timeout_in_ms: 5000
 # How long a coordinator should continue to retry a CAS operation
@@ -780,7 +780,8 @@ cross_node_timeout: false
 # sstable or rebuild table indexes.
 # Default value is 86400000ms, which means stale streams timeout after 24 hours.
 # A value of zero means stream sockets should never time out.
-# streaming_socket_timeout_in_ms: 86400000
+# Set to 10 hours
+streaming_socket_timeout_in_ms: 36000000
 
 # phi value that must be reached for a host to be marked down.
 # most users should never need to adjust this.
